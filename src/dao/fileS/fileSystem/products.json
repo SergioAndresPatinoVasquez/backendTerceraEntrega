@@ -1,0 +1,57 @@
+[
+	{
+		"title": "blusas",
+		"description": "lalalalal",
+		"code": "abcjdlñ",
+		"price": 234,
+		"status": true,
+		"stock": 2,
+		"category": "zapatos",
+		"thumbnail": "hppt/...",
+		"id": "giOgeCLBU9FtlihpMqW7e"
+	},
+	{
+		"title": "gorras",
+		"description": "lalalalal",
+		"code": "abcjdlñ",
+		"price": 1,
+		"status": true,
+		"stock": 2,
+		"category": "zapatos",
+		"thumbnail": "hppt/...",
+		"id": "3xiimagO2UC9HFf044Bpi"
+	},
+	{
+		"title": "camistas",
+		"description": "lalalalal",
+		"code": "abcjdlñ",
+		"price": 1,
+		"status": true,
+		"stock": 2,
+		"category": "zapatos",
+		"thumbnail": "hppt/...",
+		"id": "VT88N03svj4LVtH30eZqS"
+	},
+	{
+		"title": "chaquetas",
+		"description": "lalalalal",
+		"code": "abcjdlñ",
+		"price": 1,
+		"status": true,
+		"stock": 2,
+		"category": "zapatos",
+		"thumbnail": "hppt/...",
+		"id": "an294X0rsU34wkzSOJSlP"
+	},
+	{
+		"title": "jeans",
+		"description": "lalalalal",
+		"code": "abcjdlñ",
+		"price": 1,
+		"status": true,
+		"stock": 2,
+		"category": "zapatos",
+		"thumbnail": "hppt/...",
+		"id": "ivv8oWPxokQuE9_blT8YM"
+	}
+]

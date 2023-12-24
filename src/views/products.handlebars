@@ -1,0 +1,46 @@
+<div>
+    <h2>Tu perfil (sin datos sensibles)</h2>
+    <p>Hola, {{user.first_name}}</p>    
+    <p>Tu correo eletrónico es: {{user.email}}</p>
+    <p>Tienes {{user.age}} años</p>
+    <p>Tu role es : {{user.role}}</p>
+    </br>
+    <a href="/api/sessions/logout"><button class="logout">Logout</button></a>
+</div> 
+
+
+<div class="products">
+    <h2>Productos</h2>
+  
+    {{#each products}}
+      
+        <p>Title : {{this.title}}</p>
+        <p>Description : {{this.description}}</p>
+        <p>Code : {{this.code}}</p>
+        <p>Price : {{this.price}}</p>
+        <p>Status : {{this.status}}</p>
+        <p>Stock : {{this.stock}}</p>
+        <p>Category : {{this.category}}</p>
+        <p>Thumbnail : {{this.thumbnail}}</p> 
+        <button type="button" onclick="addProduct('{{this._id}}')">Agregar al Carrito</button>
+        <hr>
+        </br>
+    
+    {{/each}}
+
+    {{#if hasNextPage}}
+    <a href="/products?page={{nextPage}}&limit={{limit}}"><button>Siguiente</button></a>
+    {{/if}}
+
+    {{#if hasPrevPage}}
+    <a href="/products?page={{prevPage}}&limit={{limit}}"><button>Anterior</button></a>
+    {{/if}} 
+
+</div>
+
+<script src="/js/main.js"></script>
+
+
+
+
+
