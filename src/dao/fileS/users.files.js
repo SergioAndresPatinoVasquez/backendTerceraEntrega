@@ -1,5 +1,4 @@
-import {promises as fs} from 'fs'
-import {nanoid} from 'nanoid'
+
 import UsersManager from './product.files.js'
 
 const allProducts = new UsersManager

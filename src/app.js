@@ -1,4 +1,4 @@
-import express, { Router } from 'express';
+import express from 'express';
 import handlebars from 'express-handlebars';
 import session from 'express-session';
 import initializePassport from './config/passport.config.js'; 
@@ -13,14 +13,71 @@ import ProductsRouter from './routes/products.routes.js';
 import githubRouter from './routes/sessions.routes.js';
 import configs from './config/config.js';
 import { passportStrategiesEnum } from './config/enums.config.js';
-
+import nodemailer from 'nodemailer';
+import twilio from 'twilio';
+import errorHandler from './middlewares/errors/index.js';
+import toAsyncRouter from 'async-express-decorator';
 
 const app = express();
 
 const viewsRouter = new ViewsRouter();
-const usersRouter = new UsersRouter();
-const productsRouter = new ProductsRouter();
+const usersRouter = toAsyncRouter(new UsersRouter());
+const productsRouter = toAsyncRouter(new ProductsRouter());
 const cartsRouter = new CartsRouter();
+
+
+//Mensajes por gmail*********************************************/
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    port: 587,
+    auth: {
+        user:'sergioandres98@gmail.com',
+        pass: 'gqirofuvghvxkdbg'
+    }
+});
+
+app.get('/mail', async(req, res) =>{
+    await transporter.sendMail({
+        from: 'Coder',
+        to: 'sergioandres98@gmail.com',
+        subject: 'correo de prueba',
+        html:'<div><h1>Hola, es una prueba </h1></div>',
+        attachments: []
+    })
+    res.send('Correo enviado')
+})
+//*********************************************************/
+
+//Twilio******************************************************
+const TWILIO_ACCOUNT_SID = 'AC502bd47d4835949da5f5ed1f6227f4b1';
+const TWILIO_AUTH_TOKEN = '756752a9bfecafa2f826a43b34820663';
+const TWILIO_PHONE_NUMBER = '+12134936769';
+
+const client = twilio(
+    TWILIO_ACCOUNT_SID,
+    TWILIO_AUTH_TOKEN,
+    TWILIO_PHONE_NUMBER
+)
+
+app.get('/sms', async (req, res)=>{
+    await client.messages.create({
+        from: TWILIO_PHONE_NUMBER,
+        to: '+573012895266',
+        body: 'Este es un mensaje de prueba de SMS'
+    });
+    res.send('SMS ENVIADO')
+});
+
+app.get('/whatsapp', async (req, res)=>{
+    await client.messages.create({
+        from: 'whatsapp:+14155238886',
+        to: 'whatsapp:+573012895266',
+        body: 'Este es un mensaje de prueba de Whatsapp'
+    });
+    res.send('WHATSAPP ENVIADO')
+});
+
+//********************************************************* */
 
 app.use(session({
     // store: MongoStore.create({
@@ -62,9 +119,10 @@ app.use("/api/products", productsRouter.getRouter());
 app.use("/api/purchase", cartsRouter.getRouter());
 app.use("/api/carts", cartsRouter.getRouter());
 
+app.use(errorHandler);
+
 console.log(configs)
 
-//ya esta en factory
 try {
     await mongoose.connect(configs.mongoUrl)
     console.log('DB connected')
@@ -75,4 +133,3 @@ try {
 
 app.listen(configs.port, () => console.log('Server running'));
 
-// await mongoose.connect('mongodb+srv://sergioandres98:seryus1984@mongodb101.2xndcrf.mongodb.net/segundaPractica?retryWrites=true&w=majority')

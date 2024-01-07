@@ -2,7 +2,8 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { PRIVATE_KEY_JWT } from './config/constants.config.js';
+import config from './config/config.js';
+import { fakerES as faker} from '@faker-js/faker';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -17,13 +18,48 @@ const isValidPassword = (plainPassword, hashedPassword) =>
 
 
 const generateToken = (user) => {
-    const token = jwt.sign({ user }, PRIVATE_KEY_JWT, { expiresIn: '24h' });
+    const token = jwt.sign({ user }, config.jwt_key, { expiresIn: '24h' });
     return token;
 }
+
+const generateUsers = () => {
+    const numberOfProducts = faker.number.int({min:1, max:5});
+    let products = [];
+
+    for (let i=0; i < numberOfProducts; i++){
+        products.push(generateProduct());
+    }
+
+    return{
+        first_name: faker.person.firstName(),
+        last_name: faker.person.lastName(),
+        email: faker.internet.email(),
+        age: faker.number.int({min:18, max:100}),
+        password: faker.internet.password(),        
+        role : faker.helpers.arrayElement(['user','admin','public']),
+        products
+    };
+}
+
+const generateProduct = () =>{
+
+    return{
+        id: faker.database.mongodbObjectId(),
+        title : faker.commerce.productName(),
+        description : faker.commerce.productDescription(),
+        price : faker.commerce.price(),
+        stock : faker.number.int(1),
+        code : faker.string.alphanumeric(10),
+        category : faker.commerce.department(),
+        thumbnail : faker.image.url()
+    }
+}
+
 
 export {
     __dirname,
     createHash,
     isValidPassword,
-    generateToken
+    generateToken,
+    generateUsers
 };

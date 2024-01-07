@@ -106,7 +106,7 @@ import { getAllCarts as getAllCartsServices, saveCart as saveCartsServices,
             let Cartid = req.params.cid;
             console.log("cid", Cartid);
             const result = await getCartsByIdService(Cartid);    
-            //const result = await cartsModel.find(cart).populate('products.product');       
+                 
             res.send(result);
     
         } catch (error) {            
@@ -119,7 +119,6 @@ import { getAllCarts as getAllCartsServices, saveCart as saveCartsServices,
         try {
             const cid = req.params.cid;
             const user = req.user;
-
             const result = await purchaseService(cid, user);
             res.json(result);
         } catch (error) {

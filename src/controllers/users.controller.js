@@ -1,24 +1,41 @@
-import { generateToken, isValidPassword } from "../utils.js";
+import { generateToken, isValidPassword, generateUsers } from "../utils.js";
 import {getByemailLogin as getByemailLoginServices, getByemailRegister as getByemailRegisterServices,
       saveServices} from '../services/users.service.js';
+import CustomError from '../middlewares/errors/customError.js';
+import EErrors from '../middlewares/errors/enums.js';
 
 
-const login = async  (req, res)=> {
+const login = async  (req, res, next)=> {
         try {
            const {email, password} = req.body
            if(!email || !password){
-              return res.sendClientError('incomplete values')
+            throw CustomError.createError({                    
+              name: 'UserError',
+              cause: 'Incomplete values',
+              message: 'Error trying to login user',
+              code: EErrors.INVALID_TYPE_ERROR
+            })
            }
     
           const user = await getByemailLoginServices(email);
           if(!user){
-            return res.sendClientError('incorrect credential')
+            throw CustomError.createError({                    
+              name: 'UserError',
+              cause: 'incorrect credential',
+              message: 'Error trying to login user by email',
+              code: EErrors.INVALID_TYPE_ERROR
+            })
           }
     
           const comparePassword = isValidPassword(password, user.password);
     
           if(!comparePassword){
-            return res.sendClientError('incorrect credential')
+            throw CustomError.createError({                    
+              name: 'UserError',
+              cause: 'incorrect credential',
+              message: 'Error trying to login user by password',
+              code: EErrors.INVALID_TYPE_ERROR
+            })
           }
 
           const userId = user._id;
@@ -33,25 +50,38 @@ const login = async  (req, res)=> {
           //res.sendSuccess(accessToken);       
          
         } catch (error) {
-           res.sendServerError(error.message);
+          next(error);
         } 
-     }
+     };
 
 
 
-    const register =   async (req, res) => {
-            try {
+    const register =  async (req, res, next) => {
+             try {
                 const { first_name, last_name, email, age, role, password } = req.body;
+
+                console.log(first_name, last_name, email)
         
                 // Agrega la lógica de validación según tus necesidades
-                if (!first_name || !last_name || !email || !age || !role || !password ) {
-                    return res.status(400).json({ error: 'incomplete values' });
+                if (!first_name || !last_name || !email || !age || !role || !password ) {                  
+                  throw CustomError.createError({                    
+                    name: 'UserError',
+                    cause: 'Incomplete values',
+                    message: 'Error trying to register user',
+                    code: EErrors.INVALID_TYPE_ERROR
+                  })
                 }
         
                 const existsUser = await getByemailRegisterServices(email);
         
                 if (existsUser) {
-                    return res.status(400).json({ error: 'user already exists' });
+
+                    throw CustomError.createError({                    
+                      name: 'UserError',
+                      cause: 'user already exists',
+                      message: 'Error trying to register user',
+                      code: EErrors.INVALID_TYPE_ERROR
+                    })
                 }
         
                 const result = await saveServices(first_name, last_name, email, age, role, password);
@@ -59,16 +89,29 @@ const login = async  (req, res)=> {
                 const accessToken = generateToken(result);
                 res.status(201).json({ status: 'success', access_token: accessToken });
                 
-            } catch (error) {
-                console.error('Error en el registro:', error);
-                res.status(500).json({ error: 'Error interno del servidor' });
-            }
+             } catch (error) {
+                     next(error);
+             }
+        };
+
+        const usersMocking = async (req,res) => {
+          let users = [];
+
+          for(let i=0; i<100; i++){
+              users.push(generateUsers());
+          }
+
+          res.send({
+            status: 'ok',
+            counter: users.length,
+            data: users
+          });
         }
-
-
 
 
      export {
         login,
-        register
+        register,
+        usersMocking
      }
+

@@ -58,7 +58,6 @@ export default class ProductsRepository {
 
         let products = await this.dao.getProductsById();
         let productsById = products.find(prod => prod._id.toString() === id)
-        if (!productsById) return "Producto No encontrado"
         return productsById;
     }
 

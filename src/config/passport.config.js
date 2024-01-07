@@ -3,7 +3,7 @@ import passport from 'passport';
 import jwt from 'passport-jwt';
 import usersModel from '../dao/mongo/models/users.model.js';
 import { passportStrategiesEnum } from './enums.config.js';
-import { PRIVATE_KEY_JWT } from './constants.config.js';
+import config from '../config/config.js';
 import GitHubStrategy from 'passport-github2';
 
 
@@ -22,7 +22,7 @@ const cookieExtractor = req => {
 const initializePassport = () => {
     passport.use(passportStrategiesEnum.JWT, new JWTStrategy({
         jwtFromRequest: ExtractJWT.fromExtractors([cookieExtractor]),
-        secretOrKey: PRIVATE_KEY_JWT
+        secretOrKey: config.jwt_key//PRIVATE_KEY_JWT
 
     }, async(jwt_payload, done) => {
         try {
@@ -66,12 +66,12 @@ const initializePassport = () => {
             }        
         } catch (error) {
             console.error('Error en la autenticación de GitHub:', error);
-            return done('Incorrect credentials compa');
+            return done('Incorrect credentials');
         }
     }));
 
 
-    //Serialización y deSerialización
+    // //Serialización y deSerialización
     passport.serializeUser((user, done)=>{
         done(null, user._id);
     });

@@ -1,6 +1,8 @@
 import {getAllProducts as getAllProductsServices, saveProduct as saveProductServices,
    getProductsById as getProductsByIdServices, deleteProduct as deleteProductServices,
    updatedProducts as updatedProductsServices} from '../services/products.service.js';
+import CustomError from '../middlewares/errors/customError.js';
+import EErrors from '../middlewares/errors/enums.js';
 
 
 const getAllProducts = async (req, res) => {
@@ -21,13 +23,19 @@ const getAllProducts = async (req, res) => {
       } 
    }
 
-   const saveProduct = async (req, res) => {
+   const saveProduct = async (req, res, next) => {
 
       try {
          const {title, description, code, price, status, stock, category, thumbnail} = req.body
       
       if (!title || !description || !code || !price || !status || !category || !thumbnail) {
-         return res.sendClientError('incomplete values');
+         //return res.sendClientError('incomplete values');
+         throw CustomError.createError({                    
+            name: 'UserError',
+            cause: 'Incomplete values',
+            message: 'Error trying to save product',
+            code: EErrors.INVALID_TYPE_ERROR
+          })
       }   
       const result = await  saveProductServices({
          title,
@@ -41,19 +49,31 @@ const getAllProducts = async (req, res) => {
       });   
       res.sendSuccess(result); 
       } catch (error) {
-         res.sendServerError(error.message);
+         //res.sendServerError(error.message);
+         next(error);
       }
    
    }
 
-   const getProductsById= async  (req, res) =>{
+   const getProductsById= async  (req, res, next) =>{
       try {
          let id = req.params.id //ojo es un string 
-         console.log("id req:", id);
          const result = await getProductsByIdServices(id)
+
+         if (!result) {
+            //return res.sendClientError('incomplete values');
+            throw CustomError.createError({                    
+               name: 'ProductFindByIdError',
+               cause: 'Product not found',
+               message: 'Error trying to find product by Id',
+               code: EErrors.PRODUCT_NOT_FOUND
+             })
+         }  
+
          res.sendSuccess(result);  
       } catch (error) {
-         res.sendServerError(error.message);
+         //res.sendServerError(error.message);
+         next(error);
       }
    
    }
