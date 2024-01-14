@@ -17,6 +17,7 @@ import nodemailer from 'nodemailer';
 import twilio from 'twilio';
 import errorHandler from './middlewares/errors/index.js';
 import toAsyncRouter from 'async-express-decorator';
+import { addLogger } from './utils/logger.js';
 
 const app = express();
 
@@ -97,6 +98,7 @@ initializePassport();
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use(addLogger);
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true}));

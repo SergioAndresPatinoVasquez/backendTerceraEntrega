@@ -26,7 +26,6 @@ const initializePassport = () => {
 
     }, async(jwt_payload, done) => {
         try {
-            console.log('JWT Payload:', jwt_payload);
             return done(null, jwt_payload.user) //req.user
         } catch (error) {
             return done(error);
@@ -42,11 +41,9 @@ const initializePassport = () => {
 
     }, async (accessToken, refreshToken, profile, done,) =>{
         try {
-            console.log("profile",profile);
+
             const email =  profile.emails[0].value;
             const user = await usersModel.findOne({ email });
-            console.log("user", user)
-            console.log("user", email)
 
             if(!user){//valido el correo
                 //crear la cuenta o usuario desde cero
@@ -65,7 +62,7 @@ const initializePassport = () => {
                 return done(null, user);
             }        
         } catch (error) {
-            console.error('Error en la autenticación de GitHub:', error);
+            req.logger.error(`Incorrect credential GitHub: ${error.message}`, { error });
             return done('Incorrect credentials');
         }
     }));

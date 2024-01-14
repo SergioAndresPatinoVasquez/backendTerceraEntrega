@@ -5,6 +5,7 @@ import CustomError from '../middlewares/errors/customError.js';
 import EErrors from '../middlewares/errors/enums.js';
 
 
+
 const login = async  (req, res, next)=> {
         try {
            const {email, password} = req.body
@@ -37,19 +38,24 @@ const login = async  (req, res, next)=> {
               code: EErrors.INVALID_TYPE_ERROR
             })
           }
+          // Advertencia si el usuario no tiene contraseña
+          if (!user.password) {
+            req.logger.warning(`User ${user.email} does not have a password.`);
+          }
 
           const userId = user._id;
-          console.log("user id", userId);
 
           //eliminado el password de las cookies
           const{password:_, ...userResult} = user
     
           const accessToken = generateToken(userResult);
-          console.log("Token login", accessToken)
+          req.logger.info(`AccessToken created successfully ${accessToken}`)
           res.cookie('coderCookieToken', accessToken, {maxAge: 60 * 60 * 1000, httpOnly: true}).send({status:'success', message:'login success'})
           //res.sendSuccess(accessToken);       
          
         } catch (error) {
+          req.logger.error(`Error in login: ${error.message}`, { error });
+
           next(error);
         } 
      };
@@ -59,8 +65,6 @@ const login = async  (req, res, next)=> {
     const register =  async (req, res, next) => {
              try {
                 const { first_name, last_name, email, age, role, password } = req.body;
-
-                console.log(first_name, last_name, email)
         
                 // Agrega la lógica de validación según tus necesidades
                 if (!first_name || !last_name || !email || !age || !role || !password ) {                  
@@ -90,7 +94,9 @@ const login = async  (req, res, next)=> {
                 res.status(201).json({ status: 'success', access_token: accessToken });
                 
              } catch (error) {
-                     next(error);
+              req.logger.error(`Error in register: ${error.message}`, { error });
+
+              next(error);
              }
         };
 

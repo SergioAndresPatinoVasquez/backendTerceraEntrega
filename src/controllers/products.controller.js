@@ -19,7 +19,7 @@ const getAllProducts = async (req, res) => {
    
          res.sendSuccess(search);   
       } catch (error) {
-         res.sendServerError(error.message);
+         req.logger.error(`Error getting products: ${error.message}`, { error });
       } 
    }
 
@@ -49,7 +49,7 @@ const getAllProducts = async (req, res) => {
       });   
       res.sendSuccess(result); 
       } catch (error) {
-         //res.sendServerError(error.message);
+         req.logger.error(`Error saving products: ${error.message}`, { error });
          next(error);
       }
    
@@ -82,6 +82,7 @@ const getAllProducts = async (req, res) => {
       try {
          let id = req.params.id
          const result = await deleteProductServices(id);
+         req.logger.info(`Product with ID ${id} deleted successfully`);
          res.sendSuccess(result); 
       } catch (error) {
          res.sendServerError(error.message);

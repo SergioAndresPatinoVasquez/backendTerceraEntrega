@@ -63,6 +63,7 @@ import { getAllCarts as getAllCartsServices, saveCart as saveCartsServices,
         let productId =req.params.pid
 
         const userId = req.user._id;
+        req.logger.info(`Add Product successfully`)
     
         const result = await addProductInCartServices(cartId, productId, userId);
 

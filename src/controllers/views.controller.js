@@ -80,6 +80,23 @@ import { cartsView as cartsViewService, cartsIdView as cartsIdViewService,
         }
       }
 
+      const loggerTest = async (req, res) => {
+        try {
+          //custom levels
+          req.logger.fatal('prueba fatal');
+          req.logger.error('prueba error');
+          req.logger.warning('prueba warning');
+          req.logger.info('prueba info');
+          req.logger.http('prueba http');
+          req.logger.debug('prueba debug');
+
+          res.send({result: 'Probando winston'})
+          
+        } catch (error) {
+          
+        }
+      }
+
 
       export {
         productsView,
@@ -87,6 +104,7 @@ import { cartsView as cartsViewService, cartsIdView as cartsIdViewService,
         cartsIdView,
         registerView,
         loginView,
-        currentView
+        currentView,
+        loggerTest
 
       }
