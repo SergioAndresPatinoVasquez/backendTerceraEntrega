@@ -99,6 +99,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(addLogger);
+//app.use("/api", passport.authenticate(passportStrategiesEnum.JWT));
+
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true}));

@@ -7,6 +7,8 @@ import { getAllCarts as getAllCartsServices, saveCart as saveCartsServices,
        deleteProduct as deleteProductService,
        getCartsById as getCartsByIdService,
        purchase as purchaseService} from '../services/carts.service.js'
+import { getProductsById } from '../services/products.service.js';
+
 
   const getAllCarts =  async (req, res) => {
         try {
@@ -56,24 +58,53 @@ import { getAllCarts as getAllCartsServices, saveCart as saveCartsServices,
         }
     }
 
-    const addProductInCart = async  (req, res) =>{
+    const addProductInCart = async (req, res) => {
         try {
-
-        let cartId =req.params.cid
-        let productId =req.params.pid
-
-        const userId = req.user._id;
-        req.logger.info(`Add Product successfully`)
+            let cartId = req.params.cid;
+            let productId = req.params.pid;
     
-        const result = await addProductInCartServices(cartId, productId, userId);
-
-        res.sendSuccess(result);
-        } catch (error) {
-            res.status(500).json({ error: 'Internal Server Error' });
+            const userId = req.user._id;
+            const userRole = req.user.role ? req.user.role.toLowerCase() : '';
+            console.log("role",userRole)
     
+            // Verificar si el usuario es 'PREMIUM' y el producto le pertenece
+            const product = await getProductsById(productId);
+    
+        // Verificar si el usuario es 'PREMIUM' y el producto le pertenece
+        if (userRole === 'premium' && product && (product.owner ? product.owner.toString() : 'admin') === userId) {
+            throw new Error('You cannot add your own product to the cart.');
         }
     
-    }
+            const result = await addProductInCartServices(cartId, productId, userId);
+            console.log("result", result)
+    
+            res.sendSuccess(result);
+        } catch (error) {
+            res.sendServerError(error.message);
+        }
+    };
+    
+
+    
+
+    // const addProductInCart = async  (req, res) =>{
+    //     try {
+
+    //     let cartId =req.params.cid
+    //     let productId =req.params.pid
+
+    //     const userId = req.user._id;
+    //     req.logger.info(`Add Product successfully`)
+    
+    //     const result = await addProductInCartServices(cartId, productId, userId);
+
+    //     res.sendSuccess(result);
+    //     } catch (error) {
+    //         res.status(500).json({ error: 'Internal Server Error' });
+    
+    //     }
+    
+    // }
 
     const deleteProductInCart = async  (req, res) => {
         try {

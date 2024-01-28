@@ -77,6 +77,8 @@ export default class Router {
     applyCustomPassportCall = (strategy) => (req, res, next) => {
         if (strategy === passportStrategiesEnum.JWT) {
             //custom passport call
+            console.log("ingresa strategy", strategy)
+            console.log("ingresa passportStrategiesEnum.JWT", passportStrategiesEnum.JWT)
   
             passport.authenticate(strategy, function (err, user, info) {
                 if(err) return next(err);
@@ -91,11 +93,13 @@ export default class Router {
                 next();
             })(req, res, next);
         } else {
+            console.log("ingresa a next")
             next();
         }
     }
 
     handlePolicies = (policies) => (req, res, next) => {
+        
         if (policies[0] === accessRolesEnum.PUBLIC) return next();
 
         const user = req.user;

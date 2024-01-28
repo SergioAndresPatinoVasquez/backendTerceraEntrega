@@ -38,6 +38,11 @@ const productsSchema = new mongoose.Schema({
     thumbnail : {
         type: String,
         required: true
+    },
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,  // Cambiado a ObjectId
+        ref: 'users',  // Referencia a la colección de usuarios
+        required: true
     }
 
 });

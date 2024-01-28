@@ -1,123 +1,285 @@
-import { generateToken, isValidPassword, generateUsers } from "../utils.js";
+import { generateToken, isValidPassword, generateUsers, createHash} from "../utils.js";
 import {getByemailLogin as getByemailLoginServices, getByemailRegister as getByemailRegisterServices,
-      saveServices} from '../services/users.service.js';
+      saveServices, passwordChangedService, changeUserRoleService} from '../services/users.service.js';
 import CustomError from '../middlewares/errors/customError.js';
 import EErrors from '../middlewares/errors/enums.js';
+import nodemailer from 'nodemailer';
+import config from '../config/config.js';
+import jwt from 'jsonwebtoken';
 
 
 
-const login = async  (req, res, next)=> {
-        try {
-           const {email, password} = req.body
-           if(!email || !password){
-            throw CustomError.createError({                    
-              name: 'UserError',
-              cause: 'Incomplete values',
-              message: 'Error trying to login user',
-              code: EErrors.INVALID_TYPE_ERROR
-            })
-           }
-    
-          const user = await getByemailLoginServices(email);
-          if(!user){
-            throw CustomError.createError({                    
-              name: 'UserError',
-              cause: 'incorrect credential',
-              message: 'Error trying to login user by email',
-              code: EErrors.INVALID_TYPE_ERROR
-            })
-          }
-    
-          const comparePassword = isValidPassword(password, user.password);
-    
-          if(!comparePassword){
-            throw CustomError.createError({                    
-              name: 'UserError',
-              cause: 'incorrect credential',
-              message: 'Error trying to login user by password',
-              code: EErrors.INVALID_TYPE_ERROR
-            })
-          }
-          // Advertencia si el usuario no tiene contraseña
-          if (!user.password) {
-            req.logger.warning(`User ${user.email} does not have a password.`);
-          }
+const login = async (req, res, next) => {
+  try {
+    const {
+      email,
+      password
+    } = req.body
+    if (!email || !password) {
+      throw CustomError.createError({
+        name: 'UserError',
+        cause: 'Incomplete values',
+        message: 'Error trying to login user',
+        code: EErrors.INVALID_TYPE_ERROR
+      })
+    }
 
-          const userId = user._id;
+    const user = await getByemailLoginServices(email);
+    if (!user) {
+      throw CustomError.createError({
+        name: 'UserError',
+        cause: 'incorrect credential',
+        message: 'Error trying to login user by email',
+        code: EErrors.INVALID_TYPE_ERROR
+      })
+    }
 
-          //eliminado el password de las cookies
-          const{password:_, ...userResult} = user
-    
-          const accessToken = generateToken(userResult);
-          req.logger.info(`AccessToken created successfully ${accessToken}`)
-          res.cookie('coderCookieToken', accessToken, {maxAge: 60 * 60 * 1000, httpOnly: true}).send({status:'success', message:'login success'})
-          //res.sendSuccess(accessToken);       
-         
-        } catch (error) {
-          req.logger.error(`Error in login: ${error.message}`, { error });
+    const comparePassword = isValidPassword(password, user.password);
 
-          next(error);
-        } 
-     };
+    if (!comparePassword) {
+      throw CustomError.createError({
+        name: 'UserError',
+        cause: 'incorrect credential',
+        message: 'Error trying to login user by password',
+        code: EErrors.INVALID_TYPE_ERROR
+      })
+    }
+    // Advertencia si el usuario no tiene contraseña
+    if (!user.password) {
+      req.logger.warning(`User ${user.email} does not have a password.`);
+    }
 
+    const userId = user._id;
 
+    //eliminado el password de las cookies
+    const {
+      password: _,
+      ...userResult
+    } = user
 
-    const register =  async (req, res, next) => {
-             try {
-                const { first_name, last_name, email, age, role, password } = req.body;
-        
-                // Agrega la lógica de validación según tus necesidades
-                if (!first_name || !last_name || !email || !age || !role || !password ) {                  
-                  throw CustomError.createError({                    
-                    name: 'UserError',
-                    cause: 'Incomplete values',
-                    message: 'Error trying to register user',
-                    code: EErrors.INVALID_TYPE_ERROR
-                  })
-                }
-        
-                const existsUser = await getByemailRegisterServices(email);
-        
-                if (existsUser) {
+    const accessToken = generateToken(userResult, '24h');
+    req.logger.info(`AccessToken created successfully ${accessToken}`)
+    res.cookie('coderCookieToken', accessToken, {
+      maxAge: 60 * 60 * 1000,
+      httpOnly: true
+    }).send({
+      status: 'success',
+      message: 'login success'
+    })
+    //res.sendSuccess(accessToken);       
 
-                    throw CustomError.createError({                    
-                      name: 'UserError',
-                      cause: 'user already exists',
-                      message: 'Error trying to register user',
-                      code: EErrors.INVALID_TYPE_ERROR
-                    })
-                }
-        
-                const result = await saveServices(first_name, last_name, email, age, role, password);
-        
-                const accessToken = generateToken(result);
-                res.status(201).json({ status: 'success', access_token: accessToken });
-                
-             } catch (error) {
-              req.logger.error(`Error in register: ${error.message}`, { error });
+  } catch (error) {
+    req.logger.error(`Error in login: ${error.message}`, {
+      error
+    });
 
-              next(error);
-             }
-        };
-
-        const usersMocking = async (req,res) => {
-          let users = [];
-
-          for(let i=0; i<100; i++){
-              users.push(generateUsers());
-          }
-
-          res.send({
-            status: 'ok',
-            counter: users.length,
-            data: users
-          });
-        }
+    next(error);
+  }
+};
 
 
-     export {
-        login,
-        register,
-        usersMocking
-     }
 
+const register = async (req, res, next) => {
+  try {
+    const {
+      first_name,
+      last_name,
+      email,
+      age,
+      role,
+      password
+    } = req.body;
+
+    // Agrega la lógica de validación según tus necesidades
+    if (!first_name || !last_name || !email || !age || !role || !password) {
+      throw CustomError.createError({
+        name: 'UserError',
+        cause: 'Incomplete values',
+        message: 'Error trying to register user',
+        code: EErrors.INVALID_TYPE_ERROR
+      })
+    }
+
+    const existsUser = await getByemailRegisterServices(email);
+
+    if (existsUser) {
+
+      throw CustomError.createError({
+        name: 'UserError',
+        cause: 'user already exists',
+        message: 'Error trying to register user',
+        code: EErrors.INVALID_TYPE_ERROR
+      })
+    }
+
+    const result = await saveServices(first_name, last_name, email, age, role, password);
+
+    const accessToken = generateToken(result, '24h');
+    res.status(201).json({
+      status: 'success',
+      access_token: accessToken
+    });
+
+  } catch (error) {
+    req.logger.error(`Error in register: ${error.message}`, {
+      error
+    });
+
+    next(error);
+  }
+};
+
+
+
+const sendPasswordResetLink = async (req, res, next) => {
+  try {
+    const {
+      email
+    } = req.body
+    if (!email) {
+      throw CustomError.createError({
+        name: 'UserError',
+        cause: 'Incomplete values',
+        message: 'Error trying to login user',
+        code: EErrors.INVALID_TYPE_ERROR
+      })
+    }
+
+    const user = await getByemailLoginServices(email);
+
+    console.log("ingreso si señor", user)
+
+    if (!user) {
+      throw CustomError.createError({
+        name: 'UserError',
+        cause: 'incorrect credential',
+        message: 'Error trying to login user by email',
+        code: EErrors.INVALID_TYPE_ERROR
+      })
+    }
+
+    // Genera un token con la información del usuario
+    const token = generateToken({
+      email: user.email,
+      password: user.password
+    }, '1h');
+
+    // Configura una cookie con el token en el navegador del usuario
+    res.cookie('passwordResetToken', token, {
+      maxAge: 60 * 60 * 1000,
+      httpOnly: true
+    });
+
+    // Aquí puedes enviar el enlace de restablecimiento de contraseña por correo electrónico o realizar otras acciones necesarias
+    // Envía el enlace de restablecimiento de contraseña por correo electrónico
+    const resetLink = `http://localhost:8080/reset-password?token=${token}`;
+    const mailOptions = {
+      from: email, // Cambia esto al remitente real
+      to: 'sergioandres98@gmail.com',
+      subject: 'Restablecimiento de Contraseña',
+      html: `<p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p><a href="${resetLink}">${resetLink}</a>`
+    };
+
+    // Configura el transporte de nodemailer (usando tu proveedor de correo)
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      port: 587,
+      auth: {
+        user:'sergioandres98@gmail.com',
+        pass: 'gqirofuvghvxkdbg'
+      }
+    });
+
+    // Envía el correo
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({
+      status: 'success',
+      message: 'Password reset link sent successfully'
+    });
+
+
+
+  } catch (error) {
+    req.logger.error(`Error in login: ${error.message}`, {
+      error
+    });
+
+    next(error);
+  }
+};
+
+const passwordChanged = async (req, res) => {
+  try {
+    // Recuperar el token de la cookie
+    const resetToken = req.cookies.passwordResetToken;
+
+    // Verificar si el token existe
+    if (!resetToken) {
+      throw new Error('Token not found');
+    }
+
+    // Decodificar y validar el token para obtener la información
+    let emailFromToken;    
+    const decodedToken = jwt.verify(resetToken, config.jwt_key); 
+    emailFromToken = decodedToken.user.email;
+
+    // Recuperar la contraseña del cuerpo de la solicitud
+    const { password } = req.body;
+
+    console.log("email from token", emailFromToken);
+    console.log("contraseña", password);
+
+    // Llamar al servicio para manejar la lógica de cambio de contraseña
+    await passwordChangedService(emailFromToken, password);
+
+    res.redirect('/login');
+
+  } catch (error) {
+    console.error("Error during password change:", error);
+    res.sendServerError(error.message);
+  }
+};
+
+
+const changeUserRole = async (req, res) => {
+  try {
+      const userId = req.params.uid;
+
+      // Llamada al servicio para cambiar el rol
+      const result = await changeUserRoleService(userId);
+
+      res.sendSuccess(result);
+  } catch (error) {
+      res.sendServerError(error.message);
+  }
+};
+
+
+
+
+
+
+const usersMocking = async (req, res) => {
+  let users = [];
+
+  for (let i = 0; i < 100; i++) {
+    users.push(generateUsers());
+  }
+
+  res.send({
+    status: 'ok',
+    counter: users.length,
+    data: users
+  });
+}
+
+
+export {
+  login,
+  register,
+  usersMocking,
+  sendPasswordResetLink,
+  passwordChanged,
+  changeUserRole
+
+}

@@ -36,7 +36,12 @@ const getAllProducts = async (req, res) => {
             message: 'Error trying to save product',
             code: EErrors.INVALID_TYPE_ERROR
           })
-      }   
+      }        
+
+      console.log("user_id es +++++", req.user._id)
+      // si un producto se crea sin owner se debe colocar por defecto admin 
+      const ownerId = req.user ? req.user._id : 'ADMIN';
+      
       const result = await  saveProductServices({
          title,
          description,
@@ -45,7 +50,8 @@ const getAllProducts = async (req, res) => {
          status,
          stock,
          category,
-         thumbnail
+         thumbnail,
+         owner:ownerId
       });   
       res.sendSuccess(result); 
       } catch (error) {
@@ -78,17 +84,31 @@ const getAllProducts = async (req, res) => {
    
    }
 
-   const deleteProduct = async (req, res) =>{
-      try {
-         let id = req.params.id
-         const result = await deleteProductServices(id);
-         req.logger.info(`Product with ID ${id} deleted successfully`);
-         res.sendSuccess(result); 
-      } catch (error) {
-         res.sendServerError(error.message);
-      }
-   
+
+
+const deleteProduct = async (req, res) => {
+   try {
+       const productId = req.params.id;
+       const userId = req.user._id; // Obtener el ID del usuario autenticado
+       const userRole = req.user.role ? req.user.role.toLowerCase() : '';
+
+       // Verificar la autorización para eliminar el producto
+       const product = await getProductsByIdServices(productId);
+
+       if (!product || (product.owner === null || product.owner === undefined) && userRole === 'admin' || (userRole === 'premium' && product.owner && product.owner.toString() === userId)) {
+         // Permitir la eliminación si el usuario es 'admin' o 'premium' y es el propietario del producto
+         const result = await deleteProductServices(productId);
+         req.logger.info(`Product with ID ${productId} deleted successfully`);
+         res.sendSuccess(result);
+     } else {
+         throw new Error('You are not authorized to delete this product.');
+     }
+     
+   } catch (error) {
+       res.sendServerError(error.message);
    }
+};
+
 
    const updatedProducts = async (req, res) => {
       try {

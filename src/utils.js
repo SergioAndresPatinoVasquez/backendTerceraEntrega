@@ -17,10 +17,19 @@ const isValidPassword = (plainPassword, hashedPassword) =>
     bcrypt.compareSync(plainPassword, hashedPassword)
 
 
-const generateToken = (user) => {
-    const token = jwt.sign({ user }, config.jwt_key, { expiresIn: '24h' });
+const generateToken = (user, expiresIn) => {
+    const token = jwt.sign({ user }, config.jwt_key, { expiresIn });
     return token;
 }
+
+const verifyToken = (token) => {
+    try {
+      const isValidToken = jwt.verify(token, config.jwt_key);
+      return isValidToken;
+    } catch (error) {
+      return null;
+    }
+  };
 
 const generateUsers = () => {
     const numberOfProducts = faker.number.int({min:1, max:5});
@@ -61,5 +70,6 @@ export {
     createHash,
     isValidPassword,
     generateToken,
+    verifyToken,
     generateUsers
 };

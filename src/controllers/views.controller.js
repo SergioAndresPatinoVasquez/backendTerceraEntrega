@@ -1,8 +1,9 @@
 import UsersDto from '../DTOs/users.dto.js';
 import { cartsView as cartsViewService, cartsIdView as cartsIdViewService,
        productsView as productsViewService} from '../services/views.service.js';
+import {verifyToken} from '../utils.js'; 
 
- const productsView = async (req,res) => {
+const productsView = async (req,res) => {
         try {
            // Verificar la autenticación del usuario
         if (!req.isAuthenticated()) {
@@ -97,6 +98,38 @@ import { cartsView as cartsViewService, cartsIdView as cartsIdViewService,
         }
       }
 
+      const newPassword = async (req, res) =>{
+        try {
+          // Puedes agregar lógica adicional aquí si es necesario
+          res.render('newPassword'); // "register" sería el nombre de tu archivo de vista (sin la extensión)
+        } catch (error) {
+          res.sendServerError(error.message);
+        }
+      }
+
+      const resetPassword = async (req, res) => {
+        try {
+
+          const token = req.query.token;
+
+          const isValidToken = verifyToken(token);
+
+          console.log("token valido", isValidToken)
+
+          if (!isValidToken) {
+            // Si el token es inválido o ha expirado, puedes redirigir o renderizar un mensaje de error
+            res.render('resetPassword', { token: null, error: 'Invalid or expired reset link.' });
+            return;
+          }
+
+          res.render('resetPassword', {token});
+          
+        } catch (error) {
+          res.sendServerError(error.message);
+
+        }
+      }
+
 
       export {
         productsView,
@@ -105,6 +138,7 @@ import { cartsView as cartsViewService, cartsIdView as cartsIdViewService,
         registerView,
         loginView,
         currentView,
-        loggerTest
-
+        loggerTest,
+        newPassword,
+        resetPassword
       }

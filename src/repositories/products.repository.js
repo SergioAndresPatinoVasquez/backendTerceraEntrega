@@ -55,7 +55,6 @@ export default class ProductsRepository {
 
     getProductsById = async (id) => {
 
-
         let products = await this.dao.getProductsById();
         let productsById = products.find(prod => prod._id.toString() === id)
         return productsById;

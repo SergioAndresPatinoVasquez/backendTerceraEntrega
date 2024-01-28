@@ -39,9 +39,56 @@ const saveServices = async (first_name, last_name, email, age, role, password) =
 
 }
 
+const passwordChangedService = async (email, newPassword) => {
+    // Verificar si el correo electrónico existe en la base de datos
+    const existingUser = await usersRepository.getByemail(email);
+  
+    if (!existingUser) {
+      throw new Error('User not found in the database');
+    }
+  
+    // Hacer el hash de la nueva contraseña
+    const hashedPassword = createHash(newPassword);
+  
+    // Actualizar la contraseña en la base de datos
+    await usersRepository.updatePassword(existingUser._id, hashedPassword);
+  
+    // Otras operaciones adicionales que puedas necesitar
+  };
+
+  const changeUserRoleService = async (userId) => {
+    try {
+        // Obtener el usuario por su ID
+        const user = await usersRepository.getByUserId(userId);
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        // Cambiar el rol
+        if (user.role === 'user' || user.role === 'USER') {
+            user.role = 'premium';
+        } else if (user.role === 'premium' || user.role === 'PREMIUM') {
+            user.role = 'user';
+        } else {
+            throw new Error('Invalid role');
+        }
+
+        // Guardar el usuario actualizado en la base de datos
+        const updatedUser = await usersRepository.updateUser(user);
+
+        return { message: `User role changed to ${updatedUser.role}`, user: updatedUser };
+    } catch (error) {
+        throw new Error(`Error changing user role: ${error.message}`);
+    }
+};
+
+
 
 export {
     getByemailLogin,
     getByemailRegister,
-    saveServices
+    saveServices,
+    passwordChangedService,
+    changeUserRoleService
 }

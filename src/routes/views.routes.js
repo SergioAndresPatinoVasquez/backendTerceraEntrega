@@ -1,6 +1,6 @@
 import Router from './router.js';
 import { accessRolesEnum, passportStrategiesEnum } from '../config/enums.config.js';
-import { productsView, cartsView, cartsIdView, registerView, loginView, currentView, loggerTest} from '../controllers/views.controller.js';
+import { productsView, cartsView, cartsIdView, registerView, loginView, currentView, loggerTest, newPassword, resetPassword} from '../controllers/views.controller.js';
 
 
 export default class ViewsRouter extends Router{
@@ -17,6 +17,9 @@ export default class ViewsRouter extends Router{
       this.get('/login', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, loginView);
       this.get('/current', [accessRolesEnum.ADMIN, accessRolesEnum.PUBLIC, accessRolesEnum.USER], passportStrategiesEnum.JWT, currentView);
       this.get('/loggerTest', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, loggerTest);
+      this.get('/newPassword', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, newPassword);
+      this.get('/reset-password', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, resetPassword);
+
     }
 
 }

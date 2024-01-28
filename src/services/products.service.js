@@ -9,15 +9,13 @@ const getAllProducts = async (limit,page,sort,query,queryValue) =>{
    return result;
 }
 
-const saveProduct = async (title, description, code, price, status, stock, category, thumbnail) =>{
+const saveProduct = async (title, description, code, price, status, stock, category, thumbnail, owner) =>{
 
-    const result = await productsRepository.create(title, description, code, price, status, stock, category, thumbnail);
+    const result = await productsRepository.create(title, description, code, price, status, stock, category, thumbnail, owner);
     return result;
  }
 
  const getProductsById = async (id) => {
-
-   console.log("service id", id)
 
     const result = await productsRepository.getProductsById(id);
     return result;
