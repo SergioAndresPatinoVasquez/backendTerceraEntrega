@@ -1,0 +1,182 @@
+paths:
+  /api/products:
+    get:
+      summary: Este servicio obtiene el listado de los productos ofrecidos por la ecommerce.
+      # El tag es un identificador que indica a donde (el recurso) pertenece el servicio
+      tags:
+        - Products
+      responses:
+        "200":
+          description: Los productos fueron obtenidos satisfactoriamente de la BDD.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#components/schemas/Products'
+        "401":
+          description: Error Unauthorized, debido a que el usuario no ha iniciado sesión.
+        "500":
+          description: Error interno del servidor, usualmente generado por una query defectuosa o un fallo en la conexión.
+  /api/products/{id}: 
+    get:
+      summary: Este servicio obtiene un sólo producto a partir de su id (El identificador del producto en mongodb).
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: El id del producto a buscar
+          schema:
+            $type: String
+      responses:
+        "200":
+          description: El producto fue obtenido correctamente de nuestra BDD.
+          content:
+            application/json:
+              schema:
+                $ref: '#components/schemas/Products'
+        "500":
+          description: Error interno del servidor, usualmente generado por una query defectuosa o un fallo en la conexión.
+    put:
+      summary: Este servicio actualiza el producto de acuerdo a su id.
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: El id del producto a actualizar
+          schema:
+            $type: String
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#components/requestBodiesUpdate/updateProduct'
+      responses:
+        "200":
+          description: El producto fue actualizado correctamente
+        "404":
+          description: El producto no fue encontrado en BDD.
+        "500":
+          description: Error interno del servidor, usualmente generado por una query defectuosa o un fallo en la conexión.
+    delete:
+      summary: Este servicio elimina el producto de acuerdo a su id.
+      tags:
+        - Products
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: El id del producto a eliminar
+          schema:
+            $type: String
+      responses:
+        "200":
+          description: El producto fue eliminado correctamente
+        "404":
+          description: El producto no fue encontrado en BDD.
+        "500":
+          description: Error interno del servidor, usualmente generado por una query defectuosa o un fallo en la conexión.
+
+components:
+  schemas:
+    Products:
+      type: Object
+      properties:
+        _id:
+          type: ObjectId
+          description: Id autogenerado por mongodb, es el id del producto.
+        title:
+          type: String
+          description: Es el nombre del producto almacenado en mongodb.
+        description:
+          type: String
+          description: Es la descripción del producto almacenado en mongodb.
+        code:
+          type: String
+          description: Es el código del producto almacenado en mongodb.
+        price:
+          type: Number
+          description: Es el precio del producto almacenado en mongodb.
+        status:
+          type: Boolean
+          description: Es el status del producto almacenado en mongodb.
+        stock:
+          type: Number
+          description: Es el el stock del producto disponible y almacenado en mongodb.
+        category:
+          type: String
+          description: Es la categoría en la que se clasifica el producto almacenado en mongodb.
+        thumbnail:
+          type: String
+          description: Es la dirección del producto con el fin de ver una vista previa del mismo.
+        owner:
+          type: ObjectId
+          description: Es el Id del usuario que generó el producto.
+      example:
+        _id: ObjectId("49*/eet/t=etesas")
+        title: Tennis
+        description: blancos de cuero
+        code: 12d3
+        price: $2345
+        status: true
+        stock: 4
+        category: tennis
+        thumbnail: http://teniscueroblancos/
+        owner: ObjectId("65b6acee0454b3da96673b31")
+  requestBodiesUpdate:
+    updateProduct:
+      type: Object
+      properties:
+        title:
+          type: String
+          description: Es el nombre del producto almacenado en mongodb.
+        description:
+          type: String
+          description: Es la descripción del producto almacenado en mongodb.
+        code:
+          type: String
+          description: Es el código del producto almacenado en mongodb.
+        price:
+          type: Number
+          description: Es el precio del producto almacenado en mongodb.
+        status:
+          type: Boolean
+          description: Es el status del producto almacenado en mongodb.
+        stock:
+          type: Number
+          description: Es el el stock del producto disponible y almacenado en mongodb.
+        category:
+          type: String
+          description: Es la categoría en la que se clasifica el producto almacenado en mongodb.
+        thumbnail:
+          type: String
+          description: Es la dirección del producto con el fin de ver una vista previa del mismo.
+        owner:
+          type: ObjectId
+          description: Es el Id del usuario que generó el producto.
+      example:
+        title: Tennis
+        description: blancos de cuero
+        code: 12d3
+        price: $2345
+        status: true
+        stock: 4
+        category: tennis
+        thumbnail: http://teniscueroblancos/
+        owner: ObjectId("65b6acee0454b3da96673b31")  
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

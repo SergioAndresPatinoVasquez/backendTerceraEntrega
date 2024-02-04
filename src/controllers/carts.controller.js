@@ -85,27 +85,6 @@ import { getProductsById } from '../services/products.service.js';
     };
     
 
-    
-
-    // const addProductInCart = async  (req, res) =>{
-    //     try {
-
-    //     let cartId =req.params.cid
-    //     let productId =req.params.pid
-
-    //     const userId = req.user._id;
-    //     req.logger.info(`Add Product successfully`)
-    
-    //     const result = await addProductInCartServices(cartId, productId, userId);
-
-    //     res.sendSuccess(result);
-    //     } catch (error) {
-    //         res.status(500).json({ error: 'Internal Server Error' });
-    
-    //     }
-    
-    // }
-
     const deleteProductInCart = async  (req, res) => {
         try {
             const cartId = req.params.cid;

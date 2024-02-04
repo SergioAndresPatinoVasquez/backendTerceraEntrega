@@ -3,7 +3,7 @@ import handlebars from 'express-handlebars';
 import session from 'express-session';
 import initializePassport from './config/passport.config.js'; 
 import mongoose from 'mongoose';
-import { __dirname } from './utils.js';
+import { __mainDirname, __dirname } from './utils.js';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
 import ViewsRouter from './routes/views.routes.js'
@@ -18,6 +18,8 @@ import twilio from 'twilio';
 import errorHandler from './middlewares/errors/index.js';
 import toAsyncRouter from 'async-express-decorator';
 import { addLogger } from './utils/logger.js';
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUiExpress from 'swagger-ui-express';
 
 const app = express();
 
@@ -78,7 +80,24 @@ app.get('/whatsapp', async (req, res)=>{
     res.send('WHATSAPP ENVIADO')
 });
 
-//********************************************************* */
+//**********************Clase39*********************************** */
+console.log(__mainDirname);
+const swaggerOptions = {
+    definition: {
+        openapi: '3.0.1',
+        info: {
+            title: 'Documentación Del Proyecto Ecommerce',
+            description: 'API pensada en resolver el proceso de agregar productos y recibir compras.'
+        }
+    },
+    apis: [`${__mainDirname}/docs/**/*.yaml`]
+}
+
+const specs = swaggerJsdoc(swaggerOptions);
+
+app.use('/api/docs', swaggerUiExpress.serve, swaggerUiExpress.setup(specs))
+
+//************************************************************************ */
 
 app.use(session({
     // store: MongoStore.create({
