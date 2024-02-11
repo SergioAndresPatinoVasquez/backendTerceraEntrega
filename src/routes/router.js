@@ -81,19 +81,24 @@ export default class Router {
             console.log("ingresa passportStrategiesEnum.JWT", passportStrategiesEnum.JWT)
   
             passport.authenticate(strategy, function (err, user, info) {
-                if(err) return next(err);
-
-                if(!user) {
-                    return res.status(401).send({
-                        error: info.messages ? info.messages : info.toString()
-                    })
+                if (err) {
+                    console.error("Error en la autenticación:", err);
+                    return next(err);
                 }
 
+                if (!user) {
+                    console.log("Usuario no autenticado. Enviando 401.");
+                    return res.status(401).send({
+                        error: info.messages ? info.messages : info.toString()
+                    });
+                }
+
+                console.log("Usuario autenticado:", user);
                 req.user = user;
                 next();
             })(req, res, next);
         } else {
-            console.log("ingresa a next")
+            console.log("No se requiere autenticación Passport")
             next();
         }
     }
@@ -103,7 +108,6 @@ export default class Router {
         if (policies[0] === accessRolesEnum.PUBLIC) return next();
 
         const user = req.user;
-
 
     
         if (!user || !user.role || !policies.includes(user.role.toUpperCase())) {

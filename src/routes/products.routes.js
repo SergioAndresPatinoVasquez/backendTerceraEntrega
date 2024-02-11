@@ -9,6 +9,8 @@ export default class ProductsRouter extends Router {
    }
 
    init () {
+
+
       this.get('/', [accessRolesEnum.USER, accessRolesEnum.PUBLIC, accessRolesEnum.ADMIN], passport.authenticate(passportStrategiesEnum.JWT), getAllProducts)
       this.post('/', [accessRolesEnum.ADMIN, accessRolesEnum.PREMIUM], passportStrategiesEnum.JWT, saveProduct)
       this.get('/:id', [accessRolesEnum.ADMIN, accessRolesEnum.USER], passportStrategiesEnum.JWT, getProductsById)

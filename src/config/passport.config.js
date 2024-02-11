@@ -26,8 +26,11 @@ const initializePassport = () => {
 
     }, async(jwt_payload, done) => {
         try {
+            console.log('Middleware de Passport ejecutándose...');
+            console.log('Token recibido:', jwt_payload); // Agrega esta línea para imprimir el token recibido
             return done(null, jwt_payload.user) //req.user
         } catch (error) {
+            console.error('Error en middleware de Passport:', error);
             return done(error);
         }
     }))

@@ -7,6 +7,8 @@ import EErrors from '../middlewares/errors/enums.js';
 
 const getAllProducts = async (req, res) => {
       try {
+
+         console.log("ingreso sisisisisi")
          let { limit, page, sort, query, queryValue } = req.query;
    
          const search = await getAllProductsServices({
@@ -38,7 +40,7 @@ const getAllProducts = async (req, res) => {
           })
       }        
 
-      console.log("user_id es +++++", req.user._id)
+      //console.log("user_id es +++++", req.user._id)
       // si un producto se crea sin owner se debe colocar por defecto admin 
       const ownerId = req.user ? req.user._id : 'ADMIN';
       
@@ -53,7 +55,8 @@ const getAllProducts = async (req, res) => {
          thumbnail,
          owner:ownerId
       });   
-      res.sendSuccess(result); 
+      //res.sendSuccess(result); 
+      res.send({status:"success", payload:result})
       } catch (error) {
          req.logger.error(`Error saving products: ${error.message}`, { error });
          next(error);
