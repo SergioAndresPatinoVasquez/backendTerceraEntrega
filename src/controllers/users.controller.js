@@ -1,11 +1,12 @@
-import { generateToken, isValidPassword, generateUsers, createHash} from "../utils.js";
+import { generateToken, isValidPassword, generateUsers} from "../utils.js";
 import {getByemailLogin as getByemailLoginServices, getByemailRegister as getByemailRegisterServices,
-      saveServices, passwordChangedService, changeUserRoleService} from '../services/users.service.js';
+      saveServices, passwordChangedService, changeUserRoleService, updateLastConnection, uploadDocuments as uploadDocumentsService} from '../services/users.service.js';
 import CustomError from '../middlewares/errors/customError.js';
 import EErrors from '../middlewares/errors/enums.js';
 import nodemailer from 'nodemailer';
 import config from '../config/config.js';
 import jwt from 'jsonwebtoken';
+import { checkRequiredDocumentsMiddleware } from '../middlewares/premium.js';
 
 
 
@@ -56,6 +57,8 @@ const login = async (req, res, next) => {
       password: _,
       ...userResult
     } = user
+
+    await updateLastConnection(user._id);
 
     const accessToken = generateToken(userResult, '24h');
     req.logger.info(`AccessToken created successfully ${accessToken}`)
@@ -241,9 +244,32 @@ const passwordChanged = async (req, res) => {
 };
 
 
+// const changeUserRole = async (req, res) => {
+//   try {
+//       const userId = req.params.uid;
+
+//       // Llamada al servicio para cambiar el rol
+//       const result = await changeUserRoleService(userId);
+
+//       res.sendSuccess(result);
+//   } catch (error) {
+//       res.sendServerError(error.message);
+//   }
+// };
 const changeUserRole = async (req, res) => {
   try {
       const userId = req.params.uid;
+
+      // Llamada al middleware para verificar los documentos
+      await new Promise((resolve, reject) => {
+          checkRequiredDocumentsMiddleware(req, res, (err) => {
+              if (err) {
+                  reject(err);
+              } else {
+                  resolve();
+              }
+          });
+      });
 
       // Llamada al servicio para cambiar el rol
       const result = await changeUserRoleService(userId);
@@ -253,10 +279,6 @@ const changeUserRole = async (req, res) => {
       res.sendServerError(error.message);
   }
 };
-
-
-
-
 
 
 const usersMocking = async (req, res) => {
@@ -274,12 +296,45 @@ const usersMocking = async (req, res) => {
 }
 
 
+const uploadDocuments = async (req, res, next) => {
+  try {
+    const userId = req.params.uid;
+
+    // Verificar si hay archivos en la solicitud
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ status: 'error', error: 'No se han subido archivos.' });
+    }
+
+    // Obtener el nombre del primer archivo subido
+    const filename = req.files[0].filename;
+
+    const document = req.body; // Obtén el objeto que vamos a insertar
+
+    if (!document.name) {
+      return res.status(400).json({ status: 'error', error: 'Valores incompletos: se requiere el campo "name".' });
+    }
+
+
+    if (!filename) {
+      return res.status(500).json({ status: 'error', error: 'No se han subido archivos.' });
+    }
+
+    const result = await uploadDocumentsService(userId, document, filename);
+
+    res.status(200).json({ message: 'Documentos subidos exitosamente.', user: result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al subir documentos.' });
+  }
+};
+
 export {
   login,
   register,
   usersMocking,
   sendPasswordResetLink,
   passwordChanged,
-  changeUserRole
+  changeUserRole,
+  uploadDocuments
 
 }

@@ -137,7 +137,6 @@ app.use("/api/users", usersRouter.getRouter());
 
 app.use("/api", passport.authenticate(passportStrategiesEnum.JWT))
 
-
 app.use("/api/products", productsRouter.getRouter());
 app.use("/api/purchase", cartsRouter.getRouter());
 app.use("/api/carts", cartsRouter.getRouter());

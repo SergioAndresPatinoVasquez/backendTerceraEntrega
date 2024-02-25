@@ -1,6 +1,8 @@
 import Router from './router.js';
 import { accessRolesEnum, passportStrategiesEnum } from "../config/enums.config.js";
-import { login, register, usersMocking, sendPasswordResetLink, passwordChanged, changeUserRole} from '../controllers/users.controller.js';
+import { login, register, usersMocking, sendPasswordResetLink, passwordChanged, changeUserRole, uploadDocuments} from '../controllers/users.controller.js';
+import { uploader } from '../utils.js';
+import { checkRequiredDocumentsMiddleware } from '../middlewares/premium.js';
 
 export default class UsersRouter extends Router {
    constructor(){
@@ -13,7 +15,9 @@ export default class UsersRouter extends Router {
       this.get('/mockingproducts', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, usersMocking);
       this.post('/password-link', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, sendPasswordResetLink);
       this.post('/password-changed', [accessRolesEnum.PUBLIC], passportStrategiesEnum.NOTHING, passwordChanged);
-      this.put('/premium/:uid', [accessRolesEnum.USER, accessRolesEnum.PREMIUM], passportStrategiesEnum.JWT, changeUserRole);
+      this.put('/premium/:uid', [accessRolesEnum.USER, accessRolesEnum.PREMIUM], passportStrategiesEnum.JWT, checkRequiredDocumentsMiddleware, changeUserRole);
+      this.post('/:uid/documents', [accessRolesEnum.PUBLIC], passportStrategiesEnum.JWT, uploader.array('thumbnail'), uploadDocuments);
+
 
     }
 

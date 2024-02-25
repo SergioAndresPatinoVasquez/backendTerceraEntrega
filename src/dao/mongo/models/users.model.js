@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
+import moment from 'moment';
 
 const usersCollection = 'users';
 
@@ -24,7 +25,20 @@ const usersSchema = new mongoose.Schema({
     role : {
         type: String,
         default: 'USER' //para todos los usuarios normales excepto el admin
+    },
+    documents: {
+        type: [
+            {
+                name: String,
+                reference: String
+            }
+        ],
+        default: []
+    },
+    last_connection: {
+        type: Date,
     }
+
 });
 
 usersSchema.plugin(mongoosePaginate);

@@ -83,6 +83,34 @@ const passwordChangedService = async (email, newPassword) => {
     }
 };
 
+const updateLastConnection = async (userId) => {
+    try {
+        const user = await usersRepository.getByUserId(userId);
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        // Actualiza la última conexión del usuario
+        user.last_connection = new Date();
+
+        // Guarda el usuario actualizado en la base de datos
+        await usersRepository.updateUser(user);
+
+    } catch (error) {
+        throw new Error(`Error updating last connection: ${error.message}`);
+    }
+};
+
+const uploadDocuments = async (userId, document, filename) => {
+    try {
+      const result = await usersRepository.uploadDocuments(userId, document, filename);
+      return result;
+    } catch (error) {
+      throw new Error(`Error en el servicio de subida de documentos: ${error.message}`);
+    }
+  };
+
 
 
 export {
@@ -90,5 +118,7 @@ export {
     getByemailRegister,
     saveServices,
     passwordChangedService,
-    changeUserRoleService
+    changeUserRoleService,
+    updateLastConnection,
+    uploadDocuments
 }
