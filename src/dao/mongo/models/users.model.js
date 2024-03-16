@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
-import moment from 'moment';
+
 
 const usersCollection = 'users';
 

@@ -1,3 +1,8 @@
+
+//AUN NO FUNCIONA
+//CUARTA PRACTICA INTEGRADORA CLASE 44
+//ULTIMO PUNTO
+
 import path from 'path';
 import fs from 'fs/promises';
 

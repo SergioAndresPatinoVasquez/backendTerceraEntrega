@@ -70,6 +70,9 @@ export default class Carts {
         console.log("resultado carro", result)
         return result;
     }
+
+
+
 }
 
 

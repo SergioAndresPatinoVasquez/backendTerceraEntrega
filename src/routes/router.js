@@ -75,6 +75,8 @@ export default class Router {
     }
 
     applyCustomPassportCall = (strategy) => (req, res, next) => {
+        console.log("Estrategia de autenticación:", strategy);
+
         if (strategy === passportStrategiesEnum.JWT) {
             //custom passport call
             console.log("ingresa strategy", strategy)
@@ -103,19 +105,55 @@ export default class Router {
         }
     }
 
-    handlePolicies = (policies) => (req, res, next) => {
+    // handlePolicies = (policies) => (req, res, next) => {
         
-        if (policies[0] === accessRolesEnum.PUBLIC) return next();
+    //     if (policies[0] === accessRolesEnum.PUBLIC) return next();
 
-        const user = req.user;
+    //     const user = req.user;
 
     
-        if (!user || !user.role || !policies.includes(user.role.toUpperCase())) {
-            return res.status(403).json({ error: 'not permissions' });
+    //     if (!user || !user.role || !policies.includes(user.role.toUpperCase())) {
+    //         return res.status(403).json({ error: 'not permissions' });
+    //     }
+    
+    //     next();
+    // }
+    handlePolicies = (policies) => (req, res, next) => {
+        console.log("Policies:", policies);
+    
+        if (policies[0] === accessRolesEnum.PUBLIC) {
+            console.log("Acceso público permitido");
+            return next();
         }
     
+        const user = req.user;
+    
+        if (!user) {
+            console.log("Usuario no autenticado");
+            return res.status(403).json({ error: 'not permissions - user not authenticated' });
+        }
+    
+        if (!user.role) {
+            console.log("Usuario sin rol");
+            return res.status(403).json({ error: 'not permissions - user has no role' });
+        }
+    
+        const userRole = user.role.toLowerCase(); // Convertir a minúsculas
+    
+        console.log("Usuario con rol:", userRole);
+    
+        const policiesLower = policies.map(policy => policy.toLowerCase());
+
+        if (!policiesLower.includes(userRole)) {
+            console.log("Usuario no tiene los permisos necesarios");
+            return res.status(403).json({ error: 'not permissions - insufficient role' });
+        }
+    
+        console.log("Acceso permitido para usuario con rol:", userRole);
         next();
     }
+    
+    
 
     applyCallbacks(callbacks) {
         //mapear los callbacks 1 a 1, obteniedo sus parámetros (req, res)

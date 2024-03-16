@@ -1,7 +1,10 @@
 import UsersDto from '../DTOs/users.dto.js';
 import { cartsView as cartsViewService, cartsIdView as cartsIdViewService,
-       productsView as productsViewService} from '../services/views.service.js';
+       productsView as productsViewService, getUserCarts} from '../services/views.service.js';
 import {verifyToken} from '../utils.js'; 
+import nodemailer from 'nodemailer';
+import configs from '../config/config.js';
+
 
 const productsView = async (req,res) => {
         try {
@@ -130,6 +133,70 @@ const productsView = async (req,res) => {
         }
       }
 
+      const getUserCart = async (req, res) => {
+        try {
+            console.log("Entró en getUserCart");
+    
+            // Obtener el usuario actual
+            const userId = req.user._id;
+    
+            // Obtener los carritos del usuario
+            const carts = await getUserCarts(userId);
+    
+            console.log("Carritos obtenidos:", carts);
+    
+            // Renderizar la vista del carrito con los datos obtenidos
+            res.render('userCart', { user: req.user, carts });
+        } catch (error) {
+          console.error('Error en getUserCart:', error.message); // Cambiado a error.message
+          // Manejar el error según tus necesidades
+          res.status(500).send(`Error en getUserCart: ${error.message}`);
+        }
+    };
+    
+
+    const comprarProducto = async (req, res) => {
+      try {
+
+          console.log("config:"+configs.user, configs.pass)
+          console.log('Contenido de req.body:', req.body);
+          // Obtener datos del formulario enviado por el cliente
+          const price = req.body['precio total'];
+          const userEmail = req.body.userEmail;         
+
+  
+          // Imprimir en la consola del servidor
+          console.log("Correo del usuario:", userEmail);
+          console.log("precio total:", price);
+  
+          const mailOptions = {
+            from: configs.user, // Cambia esto al remitente real
+            to: userEmail,
+            subject: 'Factura de compra',
+            html: `<p>Gracias por comprar con nosotros, el total es $ : ${price} </p>`
+          };
+
+          // Configura el transporte de nodemailer (usando tu proveedor de correo)
+          const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            port: 587,
+            auth: {
+              user: configs.mail,
+              pass: configs.pass
+            }
+          });
+
+          // Envía el correo
+          await transporter.sendMail(mailOptions);
+          // Lógica adicional para la compra
+  
+          // Responder al cliente si es necesario
+          res.status(200).send('Compra exitosa, la factura ha sido enviada a tu correo');
+      } catch (error) {
+          // Manejar errores según tus necesidades
+          res.status(500).send('Error en la compra: ' + error.message);
+      }
+  };
 
       export {
         productsView,
@@ -140,5 +207,7 @@ const productsView = async (req,res) => {
         currentView,
         loggerTest,
         newPassword,
-        resetPassword
+        resetPassword,
+        getUserCart,
+        comprarProducto
       }

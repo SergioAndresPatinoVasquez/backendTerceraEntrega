@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito de Compras</title>
+</head>
+<body>
+    <div>
+        <h2>Carrito de Compras</h2>
+        {{#with user}}
+            <p>Bienvenid@, {{first_name}} {{last_name}}</p>
+            <p data-user-email="{{email}}">Correo: {{email}}</p>
+        {{/with}}
+
+        {{#if carts}}
+            {{#each carts}}
+            <hr>
+                <h3>Carrito {{@index}}</h3>
+
+                {{#if this.products}}
+                    <ul>
+                        {{#each this.products}}
+                            <li>
+                                <p>Producto ID: {{this._id}}</p>
+                                <p>Cantidad: {{this.quantity}}</p>
+                                <p>Nombre: {{this.title}}</p>
+                                <p>Descripción: {{this.description}}</p>
+                                <p>Precio: {{this.price}}</p>                                
+                               
+                            </li>
+                        {{/each}}
+                    </ul>
+                {{else}}
+                    <p>No hay productos en este carrito</p>
+                {{/if}}
+
+                <p>Total: {{this.total}}</p>
+                <form id="comprarForm">
+                    <button type="submit" class="comprar" data-price="{{this.total}}" data-user-email="{{user.email}}">Comprar</button>
+                </form>
+                <hr>
+                <br>
+            {{/each}}
+        {{else}}
+            <p>No hay carritos disponibles</p>
+        {{/if}}
+
+        <a href="/products">Regresar a compras</a>
+    </div>
+    <script type="module" src="/js/comprar.js"></script>
+</body>
+</html>

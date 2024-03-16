@@ -42,7 +42,7 @@ const transporter = nodemailer.createTransport({
 app.get('/mail', async(req, res) =>{
     await transporter.sendMail({
         from: 'Coder',
-        to: 'sergioandres98@gmail.com',
+        to: configs.mail,
         subject: 'correo de prueba',
         html:'<div><h1>Hola, es una prueba </h1></div>',
         attachments: []
@@ -100,16 +100,11 @@ app.use('/api/docs', swaggerUiExpress.serve, swaggerUiExpress.setup(specs))
 //************************************************************************ */
 
 app.use(session({
-    // store: MongoStore.create({
-    //     client: mongoose.connection.getClient(),
-    //     ttl: 3600
-    // }),
+
     secret: 'Coder5575Secret',
     resave: true, //nos sirve para poder refrescar o actualizar la sesión luego de un de inactivadad
     saveUninitialized: true, //nos sirve para desactivar el almacenamiento de la session si el usuario aún no se ha identificado o aún no a iniciado sesión
-    // cookie: {
-    //     maxAge: 30000
-    // }
+
 }));
 
 
@@ -118,7 +113,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(addLogger);
-//app.use("/api", passport.authenticate(passportStrategiesEnum.JWT));
 
 
 app.use(express.json())

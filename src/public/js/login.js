@@ -29,5 +29,20 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error during login:', error);
         }
     });
+
+    const cartButton = document.querySelector('.userCart');
+
+    if (cartButton) {
+        cartButton.addEventListener('click', async () => {
+            try {
+                // Redirige a la página "/userCart"
+                window.location.href = '/userCart';
+            } catch (error) {
+                console.error('Error durante la obtención del carrito:', error);
+            }
+        });
+    }
+
+
 });
 

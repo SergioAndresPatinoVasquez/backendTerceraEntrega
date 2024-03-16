@@ -10,6 +10,7 @@ import { getAllCarts as getAllCartsServices, saveCart as saveCartsServices,
 import { getProductsById } from '../services/products.service.js';
 
 
+
   const getAllCarts =  async (req, res) => {
         try {
             console.log("carros")
@@ -136,6 +137,7 @@ import { getProductsById } from '../services/products.service.js';
             res.sendServerError(error.message);  
         }
     }
+
 
 
     export {

@@ -1,6 +1,4 @@
-import {
-    Users
-} from '../dao/factory.js';
+import { Users } from '../dao/factory.js';
 
 export default class UsersRepository {
     constructor() {
@@ -64,6 +62,54 @@ export default class UsersRepository {
             throw new Error(`Error en el repositorio de subida de documentos: ${error.message}`);
         }
     };
+
+    getAllUsers = async () => {
+        try {
+            // Obtener todos los usuarios desde el DAO
+            const users = await this.dao.getAllUsers();
+    
+            // // Mapear los usuarios a DTO
+            // const usersDto = users.map(user => new UsersDto(user));
+    
+            return users;
+        } catch (error) {
+            throw new Error(`Error en el repositorio getAllUsers: ${error.message}`);
+        }
+    }
+
+
+    getInactiveUsers = async (lastConnectionThreshold) => {
+        try {
+            // Verifica si lastConnectionThreshold es un objeto Date
+            if (!(lastConnectionThreshold instanceof Date)) {
+                throw new Error('El parámetro lastConnectionThreshold no es un objeto Date válido.');
+            }
+    
+            const inactiveUsers = await this.dao.getInactiveUsers({ last_connection: { $lt: lastConnectionThreshold } });
+            return inactiveUsers;
+        } catch (error) {
+            throw new Error(`Error in DAO getInactiveUsers: ${error.message}`);
+        }
+    }
+    
+    
+    deleteInactiveUsers = async (lastConnectionThreshold) => {
+        try {
+            // usuarios inactivos antes de eliminarlos
+            console.log('Llamando a getInactiveUsers en deleteInactiveUsers');
+            const deletedUsers = await this.getInactiveUsers(lastConnectionThreshold);
+    
+            // Eliminar usuarios inactivos desde la colección
+            const result = await this.dao.deleteMany({ last_connection: { $lt: lastConnectionThreshold } });
+    
+            return { deletedUsers, result };
+        } catch (error) {
+            console.error(`Error en repository deleteInactiveUsers: ${error.message}`);
+            throw new Error(`Error in repository deleteInactiveUsers: ${error.message}`);
+        }
+    }
+    
+    
     
 
 

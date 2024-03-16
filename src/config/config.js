@@ -7,7 +7,9 @@ const configs = {
     mongoUrl: process.env.MONGO_URL,
     persistence: process.env.PERSISTENCE,
     jwt_key: process.env.PRIVATE_KEY_JWT,
-    environment: process.env.ENVIRONMENT
+    environment: process.env.ENVIRONMENT,
+    mail: process.env.MAIL,
+    pass: process.env.PASS
 };
 
 console.log(process.env.PORT);
